@@ -1,9 +1,14 @@
 const { Sequelize, Model, DataTypes, Database } = require("sequelize");
 const sequelize = require("../db.js");
 
-//create model
-const users_db = sequelize.define(
-  "data",
+//create model.Define method takes two arguments
+//1- table name, 2 - column names
+// const users_db = sequelize.define(
+//   "data",
+
+class User extends Model {}
+
+User.init(
   {
     // Model attributes are defined here
     id: {
@@ -12,7 +17,7 @@ const users_db = sequelize.define(
       autoIncrement: true,
       unique: true,
     },
-    name: {
+    username: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
@@ -27,10 +32,28 @@ const users_db = sequelize.define(
   {
     //Enforcing the table name to be equal to the model name
     //freezeTableName: true,
-    tableName: "Users",
+    //tableName: "Users",
+    sequelize,
+    modelName: "user",
   }
 );
 
-console.log(users_db.tableName);
+//);
 
-module.exports = users_db;
+//console.log(users_db.tableName);
+//sync the model to the db
+
+/*
+(async () => {
+  await sequelize
+    .sync({ force: true })
+    .then(() => {
+      console.log("Database & Table created!");
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+})();
+*/
+//module.exports = users_db;
+module.exports = User;

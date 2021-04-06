@@ -1,10 +1,11 @@
 const { Sequelize, Model, DataTypes } = require("sequelize");
 
 //passing a connection URI to connect to the DB
-const sequelize = new Sequelize("db", "user", "pass", {
-  host: "localhost",
+const sequelize = new Sequelize("test-db", "user", "pass", {
+  //host: "localhost",
+  host: "db.sqlite",
   dialect: "sqlite",
-  storage: "db.sqlite",
+  //storage: "db.sqlite",
 });
 
 //const sequelize = new Sequelize("sqlite::memory");
@@ -18,23 +19,6 @@ sequelize
   .catch((err) => {
     console.error("Unable to connect to the database:", error);
   });
-
-//sync the model with the db
-(async () => {
-  await sequelize
-    .sync({ force: true })
-    .then(() => {
-      /*
-      users_db.create({
-        name: req.body.username,
-        password: req.body.password,
-      });
-      */
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-})();
 
 /*
 const users_db = {

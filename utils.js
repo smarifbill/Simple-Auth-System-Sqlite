@@ -28,4 +28,4 @@ let user = users_db.name[requestBody.username];
   */
 }
 
-module.exports = matchCredenti
+module.exports = matchCredentials;
