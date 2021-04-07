@@ -1,11 +1,7 @@
 const { Sequelize, Model, DataTypes, Database } = require("sequelize");
 const sequelize = require("../db.js");
 
-//create model.Define method takes two arguments
-//1- table name, 2 - column names
-// const users_db = sequelize.define(
-//   "data",
-
+//create model
 class User extends Model {}
 
 User.init(
@@ -26,34 +22,22 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    sessions: DataTypes.STRING,
+    /*
+    sessions: DataTypes.UUIDV4,
+    timeOfLogin: DataTypes.TIME,
+    */
   },
   // Other model options go here
   {
-    //Enforcing the table name to be equal to the model name
-    //freezeTableName: true,
-    //tableName: "Users",
     sequelize,
     modelName: "user",
   }
 );
 
-//);
-
-//console.log(users_db.tableName);
-//sync the model to the db
-
 /*
-(async () => {
-  await sequelize
-    .sync({ force: true })
-    .then(() => {
-      console.log("Database & Table created!");
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-})();
+User.associate = function ({Session}) {
+  User.hasMany(models.Session);
+};
 */
 //module.exports = users_db;
 module.exports = User;

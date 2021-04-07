@@ -7,8 +7,9 @@ const sequelize = require("./db");
 //const users_db = require("./models/model");
 const User = require("./models/model");
 
+//sync the model to the db
 sequelize
-  .sync()
+  .sync({ force: true })
   .then(() => {
     console.log("DB is ready!");
   })
@@ -28,6 +29,10 @@ app.use(express.json());
 // Render static files
 app.use(express.static("static"));
 
+const sess_db = {
+  sessions: {},
+};
+
 // show home with forms
 app.get("/", function (req, res) {
   res.render("pages/home");
@@ -40,7 +45,7 @@ app.post("/create", function (req, res) {
     username: req.body.username,
     password: req.body.password,
   })
-    .then(function (dataa) {
+    .then(function () {
       res.redirect("/");
     })
     .catch(function (error) {
@@ -50,47 +55,58 @@ app.post("/create", function (req, res) {
 });
 
 // login
-app.post("/login", function (req, res) {
-  const { username, password } = req.body;
+app.post("/login", async function (req, res) {
+  //const { username, password } = req.body;
+  let whereUser = {
+    username: req.body.username,
+    password: req.body.password,
+  };
 
-  User.findOne({
-    where: { username: username, password: password },
-  })
-    .then((foundUser) => {
-      if (foundUser) {
-        let userid = username;
-        console.log(userid);
+  if (!req.body.username || !req.body.password) {
+    res.send("login failed");
+  } else {
+    const usermatch = await User.findAll({ where: whereUser });
+    console.log(usermatch);
 
-        let id = uuidv4();
+    if (usermatch) {
+      let id = uuidv4();
 
-        const sess_db = {
-          sessions: {},
-        };
+      sess_db.sessions[id] = {
+        user: usermatch,
+        timeOfLogin: Date.now(),
+      };
+      console.log(sess_db.sessions);
 
-        sess_db.sessions[id] = {
-          user: userid,
-          timeOfLogin: Date.now(),
-        };
-        console.log(sess_db.sessions);
-
-        // create cookie that holds the UUID (the Session ID)
-        res.cookie("SID", id, {
-          expires: new Date(Date.now() + 900000),
-          httpOnly: true,
-        });
-        //res.render("pages/home");
-        res.redirect("/supercoolmembersonlypage");
-        // console.log("auth ok");
-        //res.send("login success");
-      } else {
-        res.redirect("/error");
-        //res.send("login falied");
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+      // create cookie that holds the UUID (the Session ID)
+      res.cookie("SID", id, {
+        expires: new Date(Date.now() + 900000),
+        httpOnly: true,
+      });
+      //res.render("pages/home");
+      res.redirect("/supercoolmembersonlypage");
+    } else {
+      res.redirect("/error");
+    }
+  }
 }); //end of
+
+// this is the protected route
+app.get("/supercoolmembersonlypage", function (req, res) {
+  let id = req.cookies.SID;
+  // attempt to retrieve the session.
+  // if session exists, get session
+  // otherwise, session === undefined.
+  let session = sess_db.sessions[id];
+  // if session is undefined, then
+  // this will be false, and we get sent
+  // to error.ejs
+
+  if (session) {
+    res.render("pages/members");
+  } else {
+    res.render("pages/error");
+  }
+});
 
 //delete cookie when user logs out
 //when user logs in again, a new session id is created
